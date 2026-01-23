@@ -389,3 +389,15 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   smoothScrollToElement(target, { offset: 0, duration: 520 });
 });
+
+document.getElementById("resetForm")?.addEventListener("click", () => {
+  const form = document.querySelector(".applyForm");
+  if (!form) return;
+
+  form.reset();
+
+  form.querySelectorAll("input, textarea, select").forEach((el) => {
+    if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+});
