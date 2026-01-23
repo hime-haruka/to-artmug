@@ -317,11 +317,11 @@ document.getElementById("copyForm")?.addEventListener("click", () => {
   });
 });
 
-document.getElementById("resetForm")?.addEventListener("click", () => {
-  document.querySelector(".applyForm").reset();
-});
 
-sdocument.addEventListener("DOMContentLoaded", () => {
+
+
+// ===== Smooth Anchor Scroll (for WebView / blocked hash navigation) =====
+document.addEventListener("DOMContentLoaded", () => {
   try {
     document.documentElement.style.scrollBehavior = "smooth";
   } catch (_) {}
@@ -342,7 +342,6 @@ sdocument.addEventListener("DOMContentLoaded", () => {
       offset: getFixedHeaderOffset(),
       duration: 520,
     });
-
   });
 });
 
@@ -351,4 +350,31 @@ function getFixedHeaderOffset() {
   if (!header) return 0;
   const h = header.getBoundingClientRect().height || 0;
   return Math.round(h + 8);
+}
+
+/*
+ * 스무스 스크롤
+ */
+function smoothScrollTo(element, options = {}) {
+  const offset = options.offset ?? 0;
+  const duration = options.duration ?? 500;
+
+  const startY = window.pageYOffset || document.documentElement.scrollTop || 0;
+  const rect = element.getBoundingClientRect();
+  const targetY = startY + rect.top - offset;
+
+  const startTime = performance.now();
+
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration);
+    const eased = easeOutCubic(t);
+    const y = startY + (targetY - startY) * eased;
+    window.scrollTo(0, y);
+    if (t < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
 }
