@@ -382,3 +382,17 @@ function buildFormText() {
 
   setTimeout(bindGoto, 800);
 })();
+
+document.getElementById("resetForm")?.addEventListener("click", () => {
+  const form = document.querySelector(".applyForm");
+  if (!form) return;
+
+  // 기본 reset (input/select/textarea 초기값으로)
+  form.reset();
+
+  // 혹시 값이 JS로 채워지거나 웹뷰에서 잔상 남는 경우 대비: 강제 클리어
+  form.querySelectorAll("input, textarea, select").forEach((el) => {
+    if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+});
