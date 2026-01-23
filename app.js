@@ -401,3 +401,23 @@ document.getElementById("resetForm")?.addEventListener("click", () => {
     else el.value = "";
   });
 });
+
+// ===== Artmug-safe section scroll =====
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-scroll]");
+  if (!btn) return;
+
+  const selector = btn.getAttribute("data-scroll");
+  if (!selector) return;
+
+  const target = document.querySelector(selector);
+  if (!target) return;
+
+  e.preventDefault();
+
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+    inline: "nearest"
+  });
+});
