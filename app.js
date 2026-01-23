@@ -345,79 +345,40 @@ function buildFormText() {
   return result;
 }
 
-function getScrollContainer() {
-  const candidates = [document.scrollingElement, document.documentElement, document.body].filter(Boolean);
-  return candidates[0] || document.documentElement;
-}
+// ===== safe goto scroll =====
+(function () {
+  function bindGoto() {
+    document.querySelectorAll('a[name="goto"]').forEach(a => {
+      if (a.__gotoBound) return;
+      a.__gotoBound = true;
 
-function smoothScrollToElement(el, options = {}) {
-  const container = getScrollContainer();
-  const offset = options.offset ?? 0;
-  const duration = options.duration ?? 520;
+      a.addEventListener("click", e => {
+        e.preventDefault();
 
-  const start = container === document.scrollingElement ? window.pageYOffset : container.scrollTop;
-  const rect = el.getBoundingClientRect();
-  const baseTop = container === document.scrollingElement ? 0 : container.getBoundingClientRect().top;
+        const targetId = a.getAttribute("href");
+        if (!targetId) return;
 
-  const target = start + (rect.top - baseTop) - offset;
-  const startTime = performance.now();
+        const target =
+          document.getElementById(targetId) ||
+          document.querySelector(`[name="${targetId}"]`);
 
-  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+        if (!target) {
+          console.warn("[goto] target not found:", targetId);
+          return;
+        }
 
-  function step(now) {
-    const t = Math.min(1, (now - startTime) / duration);
-    const y = start + (target - start) * easeOutCubic(t);
-
-    if (container === document.scrollingElement) window.scrollTo(0, y);
-    else container.scrollTop = y;
-
-    if (t < 1) requestAnimationFrame(step);
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest"
+        });
+      });
+    });
   }
-  requestAnimationFrame(step);
-}
 
-document.addEventListener("click", (e) => {
-  const a = e.target.closest('a[href^="#"]');
-  if (!a) return;
+  document.addEventListener("DOMContentLoaded", bindGoto);
 
-  const hash = a.getAttribute("href");
-  if (!hash || hash === "#") return;
+  window.addEventListener("load", bindGoto);
 
-  const target = document.querySelector(hash);
-  if (!target) return;
-
-  e.preventDefault();
-  smoothScrollToElement(target, { offset: 0, duration: 520 });
-});
-
-document.getElementById("resetForm")?.addEventListener("click", () => {
-  const form = document.querySelector(".applyForm");
-  if (!form) return;
-
-  form.reset();
-
-  form.querySelectorAll("input, textarea, select").forEach((el) => {
-    if (el.tagName === "SELECT") el.selectedIndex = 0;
-    else el.value = "";
-  });
-});
-
-// ===== Artmug-safe section scroll =====
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-scroll]");
-  if (!btn) return;
-
-  const selector = btn.getAttribute("data-scroll");
-  if (!selector) return;
-
-  const target = document.querySelector(selector);
-  if (!target) return;
-
-  e.preventDefault();
-
-  target.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-    inline: "nearest"
-  });
-});
+  setTimeout(bindGoto, 800);
+})();
