@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TO님 아트머그 페이지</title>
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="onestore">
+    <!-- HERO SECTION (static) -->
+    <section id="hero" class="hero">
+    <div class="hero__bg" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+        <header class="hero__header">
+        <h1 class="hero__title wonchuri">
+            2026년부터 가격이 조정되었습니다.
+        </h1>
+
+        <p class="hero__lead">
+            많은 관심과 의뢰 감사합니다. 더 좋은 퀄리티의 작업으로 보답하겠습니다.
+        </p>
+        </header>
+
+        <div class="hero__cards">
+        <article class="heroCard">
+            <h2 class="heroCard__title wonchuri">전문성</h2>
+            <ul class="heroCard__list">
+                <li>게임학과 4년제 졸업</li>
+                <li>게임 그래픽 스튜디오 근무</li>
+                <li>높은 전문성</li>
+                <li>빠른 작업</li>
+                <li>퀄리티 중심</li>
+            </ul>
+
+            <div class="heroCard__actions">
+                <a href="#form" class="cardBtn cardBtn--primary">문의하기</a>
+                <a href="#portfolio" class="cardBtn">포트폴리오</a>
+            </div>
+        </article>
+
+        <article class="heroCard heroCard--withImage">
+        <h2 class="heroCard__title wonchuri">일러스트 기반 작업 가능</h2>
+
+        <div class="heroCard__imageWrap">
+            <img
+            src="https://lh3.googleusercontent.com/d/1aOx-KhWBecGm7ouccwozY0Nk8FqG98u_"
+            alt="일러스트 작업 설명 이미지"
+            class="heroCard__image"
+            loading="lazy"
+            />
+        </div>
+
+        <p class="heroCard__text">일러스트 / 블렌더</p>
+        <p class="heroCard__text">(사용 모델: 시오)</p>
+        </article>
+    </section>
+
+    <!-- NOTICE SECTION -->
+    <section id="notice" class="notice">
+        <div class="notice__inner">
+            <header class="notice__header">
+                <h2 class="notice__title wonchuri">공지사항</h2>
+            </header>
+
+            <ul id="noticeList" class="noticeList"></ul>
+        </div>
+    </section>
+
+    <!-- PROCESS SECTION (static) -->
+    <section id="process" class="process">
+        <div class="process__inner">
+            <header class="process__header">
+            <h2 class="process__title">작업 순서</h2>
+            <p class="process__desc">문의부터 파일 전달까지의 전체 과정입니다.</p>
+            </header>
+
+            <ol class="stepGrid">
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">1</span>
+                <span class="stepIcon" aria-hidden="true">📝</span>
+                </div>
+                <h3 class="stepTitle">문의 접수</h3>
+                <p class="stepText">양식 제출 후 일정/가능 여부를 간단 안내해요.</p>
+            </li>
+
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">2</span>
+                <span class="stepIcon" aria-hidden="true">💳</span>
+                </div>
+                <h3 class="stepTitle">아트머그 결제</h3>
+                <p class="stepText">상담 완료 후 결제를 진행합니다.</p>
+            </li>
+
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">3</span>
+                <span class="stepIcon" aria-hidden="true">🎧</span>
+                </div>
+                <h3 class="stepTitle">디스코드 상담</h3>
+                <p class="stepText">취향/참고자료를 통화로 확인합니다.</p>
+            </li>
+
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">4</span>
+                <span class="stepIcon" aria-hidden="true">✨</span>
+                </div>
+                <h3 class="stepTitle">성형 작업</h3>
+                <p class="stepText">작업 후 컨펌을 진행합니다.</p>
+            </li>
+
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">5</span>
+                <span class="stepIcon" aria-hidden="true">😊</span>
+                </div>
+                <h3 class="stepTitle">페이셜 작업</h3>
+                <p class="stepText">작업 후 컨펌을 진행합니다.</p>
+            </li>
+
+            <li class="stepCard">
+                <div class="stepCard__top">
+                <span class="stepBadge">6</span>
+                <span class="stepIcon" aria-hidden="true">🧩</span>
+                </div>
+                <h3 class="stepTitle">유니티 & 파일 전달</h3>
+                <p class="stepText">
+                헤어/의상/악세 장착 후 전달합니다.
+                </p>
+                <div class="stepTags" aria-hidden="true">
+                <span class="tag">VSF</span><span class="tag">VRM</span><span class="tag">WARUDO</span>
+                </div>
+            </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ADDONS SECTION -->
+    <section id="addons" class="addons">
+        <div class="addons__inner">
+            <header class="addons__header">
+            <h2 class="addons__title">작업 가능한 부가 기능</h2>
+            <p class="addons__desc">
+                필요에 따라 추가 가능한 기능들입니다.
+            </p>
+            </header>
+
+            <ul id="addonGrid" class="addonGrid"></ul>
+        </div>
+    </section>
+
+    <!-- AVARTAR SECTION -->
+    <section id="avatars" class="avatars">
+    <div class="avatars__inner">
+        <header class="avatars__header">
+        <h2 class="avatars__title">보유 아바타</h2>
+        <p class="avatars__desc">
+            현재 보유 중인 아바타 목록입니다.
+        </p>
+        </header>
+
+        <div id="avatarImages" class="avatarImages"></div>
+    </div>
+    </section>
+
+    <!-- SALES SECTION -->
+    <section id="sales" class="sales">
+        <div class="sales__inner">
+            <header class="sales__header">
+            <h2 class="sales__title">판매작</h2>
+            <p class="sales__desc">
+                현재 판매 중이거나 공개된 작업물입니다.
+            </p>
+            </header>
+
+            <ul id="salesGrid" class="salesGrid"></ul>
+        </div>
+    </section>
+
+    <section id="portfolio" class="portfolio">
+        <div class="portfolio__inner">
+            <header class="portfolio__header">
+            <h2 class="portfolio__title">포트폴리오</h2>
+            <p class="portfolio__desc">작업했던 페이셜 예시입니다.</p>
+            </header>
+
+            <ul id="portfolioGrid" class="portfolioGrid"></ul>
+        </div>
+    </section>
+
+    <!-- FORM SECTION -->
+    <section id="form" class="apply">
+        <div class="apply__inner">
+            <header class="apply__header">
+            <h2 class="apply__title">신청 양식</h2>
+            <p class="apply__desc">
+                아래 내용을 작성 후, <strong>양식 복사</strong> 버튼을 눌러 전달해주세요.
+            </p>
+            </header>
+
+            <form class="applyForm" onsubmit="return false;">
+                <div class="applyGrid">
+                    <label>
+                    <span>1. 신청 항목</span>
+                    <input type="text" id="f_item" placeholder="ex: 1+1 세트">
+                    </label>
+
+                    <label>
+                    <span>7. 플랫폼 / 방송 닉네임</span>
+                    <input type="text" id="f_platform" placeholder="ex: 숲 / TO">
+                    </label>
+
+                    <label>
+                    <span>2. 사용하려는 아바타 BOOTH 링크</span>
+                    <input type="url" id="f_avatar">
+                    </label>
+
+                    <label>
+                    <span>3. 사용하려는 의상 BOOTH 링크</span>
+                    <input type="url" id="f_outfit">
+                    </label>
+
+                    <label>
+                    <span>4. 사용하려는 헤어 BOOTH 링크</span>
+                    <input type="url" id="f_hair">
+                    </label>
+
+                    <label>
+                    <span>8. 사용하는 버츄얼 프로그램</span>
+                    <select id="f_program">
+                        <option value="">선택</option>
+                        <option>VSeeFace</option>
+                        <option>Warudo</option>
+                    </select>
+                    </label>
+
+                    <label class="span-2">
+                    <span>5. 옷 / 헤어 색 변경사항</span>
+                    <input type="text" id="f_color" placeholder="ex: 헤어에 노란색 브릿지">
+                    </label>
+
+                    <label class="span-2">
+                    <span>6. 원하는 얼굴 / 캐릭터 느낌 (참고 이미지 링크)</span>
+                    <textarea id="f_vibe" rows="3"></textarea>
+                    </label>
+
+                    <label class="span-2">
+                    <span>9. 기타 문의 / 당부사항</span>
+                    <textarea id="f_note" rows="3"></textarea>
+                    </label>
+                </div>
+
+                <p class="apply__warn">
+                    ⚠ 결제 전 연락처를 적으시면 안 됩니다.
+                </p>
+
+                <div class="applyActions">
+                    <button type="button" class="btn btn--primary" id="copyForm">양식 복사</button>
+                    <button type="button" class="btn btn--ghost" id="resetForm">초기화</button>
+                </div>
+                </form>
+
+        </div>
+    </section>
+
+
+    <script src="./app.js"></script>
+</body>
+</html>
