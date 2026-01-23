@@ -378,3 +378,36 @@ function smoothScrollTo(element, options = {}) {
 
   requestAnimationFrame(step);
 }
+
+// ===== iFrame height reporter =====
+(function () {
+  function getDocHeight() {
+    const body = document.body;
+    const html = document.documentElement;
+
+    return Math.max(
+      body.scrollHeight, body.offsetHeight,
+      html.clientHeight, html.scrollHeight, html.offsetHeight
+    );
+  }
+
+  function postHeight() {
+    const height = getDocHeight();
+    window.parent.postMessage(
+      { type: "AM_IFRAME_HEIGHT", height },
+      "*"
+    );
+  }
+
+  postHeight();
+  window.addEventListener("load", postHeight);
+
+  const ro = new ResizeObserver(() => postHeight());
+  ro.observe(document.documentElement);
+
+  document.addEventListener("load", postHeight, true);
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(postHeight).catch(() => {});
+  }
+})();
