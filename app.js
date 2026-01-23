@@ -294,120 +294,98 @@ async function renderPortfolioFromCsv(csvUrl, targetSelector){
   }
 }
 
-document.getElementById("copyForm")?.addEventListener("click", () => {
+
+
+document.getElementById("copyForm")?.addEventListener("click", async () => {
+  const result = buildFormText();
+
+  try {
+    await navigator.clipboard.writeText(result);
+    alert("신청 양식이 복사되었습니다!");
+  } catch (err) {
+    // 폴백: 임시 textarea로 복사
+    const ta = document.createElement("textarea");
+    ta.value = result;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+
+    if (ok) alert("신청 양식이 복사되었습니다!");
+    else {
+      alert("복사가 제한되어 있어요. 아래 텍스트를 직접 복사해주세요.");
+      console.warn("[copy] blocked:", err);
+    }
+  }
+});
+
+function buildFormText() {
+  const v = (id) => (document.getElementById(id)?.value ?? "").trim();
+
   const data = {
-    "1. 신청 항목": f_item.value,
-    "2. 아바타 BOOTH 링크": f_avatar.value,
-    "3. 의상 BOOTH 링크": f_outfit.value,
-    "4. 헤어 BOOTH 링크": f_hair.value,
-    "5. 색 변경사항": f_color.value,
-    "6. 원하는 느낌 / 참고": f_vibe.value,
-    "7. 플랫폼 / 닉네임": f_platform.value,
-    "8. 사용 프로그램": f_program.value,
-    "9. 기타 문의": f_note.value,
+    "1. 신청 항목": v("f_item"),
+    "2. 아바타 BOOTH 링크": v("f_avatar"),
+    "3. 의상 BOOTH 링크": v("f_outfit"),
+    "4. 헤어 BOOTH 링크": v("f_hair"),
+    "5. 색 변경사항": v("f_color"),
+    "6. 원하는 느낌 / 참고": v("f_vibe"),
+    "7. 플랫폼 / 닉네임": v("f_platform"),
+    "8. 사용 프로그램": v("f_program"),
+    "9. 기타 문의": v("f_note"),
   };
 
   let result = "📋 작업 신청 양식\n\n";
-  for (const key in data) {
-    result += `${key}\n- ${data[key] || "없음"}\n\n`;
-  }
-
-  navigator.clipboard.writeText(result).then(() => {
-    alert("신청 양식이 복사되었습니다!");
-  });
-});
-
-
-
-
-// ===== Smooth Anchor Scroll (for WebView / blocked hash navigation) =====
-document.addEventListener("DOMContentLoaded", () => {
-  try {
-    document.documentElement.style.scrollBehavior = "smooth";
-  } catch (_) {}
-
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-
-    const hash = a.getAttribute("href");
-    if (!hash || hash === "#") return;
-
-    const target = document.querySelector(hash);
-    if (!target) return;
-
-    e.preventDefault();
-
-    smoothScrollTo(target, {
-      offset: getFixedHeaderOffset(),
-      duration: 520,
-    });
-  });
-});
-
-function getFixedHeaderOffset() {
-  const header = document.querySelector(".siteHeader.is-fixed, header.is-fixed, .header.is-fixed");
-  if (!header) return 0;
-  const h = header.getBoundingClientRect().height || 0;
-  return Math.round(h + 8);
+  for (const key in data) result += `${key}\n- ${data[key] || "없음"}\n\n`;
+  return result;
 }
 
-/*
- * 스무스 스크롤
- */
-function smoothScrollTo(element, options = {}) {
+function getScrollContainer() {
+  const candidates = [document.scrollingElement, document.documentElement, document.body].filter(Boolean);
+  return candidates[0] || document.documentElement;
+}
+
+function smoothScrollToElement(el, options = {}) {
+  const container = getScrollContainer();
   const offset = options.offset ?? 0;
-  const duration = options.duration ?? 500;
+  const duration = options.duration ?? 520;
 
-  const startY = window.pageYOffset || document.documentElement.scrollTop || 0;
-  const rect = element.getBoundingClientRect();
-  const targetY = startY + rect.top - offset;
+  const start = container === document.scrollingElement ? window.pageYOffset : container.scrollTop;
+  const rect = el.getBoundingClientRect();
+  const baseTop = container === document.scrollingElement ? 0 : container.getBoundingClientRect().top;
 
+  const target = start + (rect.top - baseTop) - offset;
   const startTime = performance.now();
 
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
   function step(now) {
-    const elapsed = now - startTime;
-    const t = Math.min(1, elapsed / duration);
-    const eased = easeOutCubic(t);
-    const y = startY + (targetY - startY) * eased;
-    window.scrollTo(0, y);
+    const t = Math.min(1, (now - startTime) / duration);
+    const y = start + (target - start) * easeOutCubic(t);
+
+    if (container === document.scrollingElement) window.scrollTo(0, y);
+    else container.scrollTop = y;
+
     if (t < 1) requestAnimationFrame(step);
   }
-
   requestAnimationFrame(step);
 }
 
-// ===== iFrame height reporter =====
-(function () {
-  function getDocHeight() {
-    const body = document.body;
-    const html = document.documentElement;
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
 
-    return Math.max(
-      body.scrollHeight, body.offsetHeight,
-      html.clientHeight, html.scrollHeight, html.offsetHeight
-    );
-  }
+  const hash = a.getAttribute("href");
+  if (!hash || hash === "#") return;
 
-  function postHeight() {
-    const height = getDocHeight();
-    window.parent.postMessage(
-      { type: "AM_IFRAME_HEIGHT", height },
-      "*"
-    );
-  }
+  const target = document.querySelector(hash);
+  if (!target) return;
 
-  postHeight();
-  window.addEventListener("load", postHeight);
-
-  const ro = new ResizeObserver(() => postHeight());
-  ro.observe(document.documentElement);
-
-  document.addEventListener("load", postHeight, true);
-
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(postHeight).catch(() => {});
-  }
-})();
+  e.preventDefault();
+  smoothScrollToElement(target, { offset: 0, duration: 520 });
+});
