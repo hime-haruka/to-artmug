@@ -320,3 +320,35 @@ document.getElementById("copyForm")?.addEventListener("click", () => {
 document.getElementById("resetForm")?.addEventListener("click", () => {
   document.querySelector(".applyForm").reset();
 });
+
+sdocument.addEventListener("DOMContentLoaded", () => {
+  try {
+    document.documentElement.style.scrollBehavior = "smooth";
+  } catch (_) {}
+
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+
+    const hash = a.getAttribute("href");
+    if (!hash || hash === "#") return;
+
+    const target = document.querySelector(hash);
+    if (!target) return;
+
+    e.preventDefault();
+
+    smoothScrollTo(target, {
+      offset: getFixedHeaderOffset(),
+      duration: 520,
+    });
+
+  });
+});
+
+function getFixedHeaderOffset() {
+  const header = document.querySelector(".siteHeader.is-fixed, header.is-fixed, .header.is-fixed");
+  if (!header) return 0;
+  const h = header.getBoundingClientRect().height || 0;
+  return Math.round(h + 8);
+}

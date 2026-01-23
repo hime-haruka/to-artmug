@@ -26,6 +26,8 @@ body {
     margin: 0 auto;
 }
 
+html { scroll-behavior: smooth; }
+
 :root{
   --sky-50:#f2fbff;
   --sky-100:#e6f7ff;
