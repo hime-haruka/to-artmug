@@ -351,3 +351,30 @@ function getFixedHeaderOffset() {
   const h = header.getBoundingClientRect().height || 0;
   return Math.round(h + 8);
 }
+
+/*
+ * 스무스 스크롤
+ */
+function smoothScrollTo(element, options = {}) {
+  const offset = options.offset ?? 0;
+  const duration = options.duration ?? 500;
+
+  const startY = window.pageYOffset || document.documentElement.scrollTop || 0;
+  const rect = element.getBoundingClientRect();
+  const targetY = startY + rect.top - offset;
+
+  const startTime = performance.now();
+
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration);
+    const eased = easeOutCubic(t);
+    const y = startY + (targetY - startY) * eased;
+    window.scrollTo(0, y);
+    if (t < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
