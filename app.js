@@ -216,32 +216,32 @@ async function renderSalesFromCsv(csvUrl, targetSelector){
       if (isActive === "FALSE" || !imgUrl) return;
 
       const src = convertDriveUrl(imgUrl);
+      const altText = title || "판매작 이미지";
 
       const li = document.createElement("li");
       li.className = "salesCard";
 
-      const cardInner = `
-        <div class="salesCard__imageWrap">
-          <img
-            src="${src}"
-            alt="${escapeHtml(title)}"
-            class="salesCard__image"
-            loading="lazy"
-          />
-        </div>
-        <div class="salesCard__title">
-          ${escapeHtml(title)}
-        </div>
+      li.innerHTML = `
+        <button type="button" class="salesCard__imageButton" aria-label="${escapeHtml(altText)} 크게 보기">
+          <div class="salesCard__imageWrap">
+            <img
+              src="${src}"
+              alt="${escapeHtml(altText)}"
+              class="salesCard__image"
+              loading="lazy"
+            />
+          </div>
+        </button>
+        ${
+          linkUrl
+            ? `<a href="${linkUrl}" target="_blank" rel="noopener" class="salesCard__titleLink">${escapeHtml(altText)}</a>`
+            : `<div class="salesCard__title">${escapeHtml(altText)}</div>`
+        }
       `;
 
-      if (linkUrl){
-        li.innerHTML = `<a href="${linkUrl}" target="_blank" rel="noopener">${cardInner}</a>`;
-        li.querySelector("a").style.textDecoration = "none";
-        li.querySelector("a").style.color = "inherit";
-        li.style.cursor = "pointer";
-      }else{
-        li.innerHTML = cardInner;
-      }
+      li.querySelector(".salesCard__imageButton")?.addEventListener("click", () => {
+        openImageModal(src, altText);
+      });
 
       grid.appendChild(li);
     });
@@ -266,7 +266,7 @@ async function renderPortfolioFromCsv(csvUrl, targetSelector){
     const res = await fetch(csvUrl, { cache: "no-store" });
     const text = await res.text();
 
-    const rows = parseCsv(text).slice(1); // header 제거
+    const rows = parseCsv(text).slice(1);
     grid.innerHTML = "";
 
     rows.forEach(row => {
@@ -275,17 +275,33 @@ async function renderPortfolioFromCsv(csvUrl, targetSelector){
       if (isActive === "FALSE" || !imgUrl) return;
 
       const src = convertDriveUrl(imgUrl);
+      const altText = title || "";
 
       const li = document.createElement("li");
       li.className = "portfolioItem";
+      li.setAttribute("role", "button");
+      li.setAttribute("tabindex", "0");
+      li.setAttribute("aria-label", `${altText} 크게 보기`);
+
       li.innerHTML = `
         <img
           src="${src}"
-          alt="${escapeHtml(title || "포트폴리오 이미지")}"
+          alt="${escapeHtml(altText)}"
           class="portfolioItem__img"
           loading="lazy"
         />
       `;
+
+      li.addEventListener("click", () => {
+        openImageModal(src, altText);
+      });
+
+      li.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openImageModal(src, altText);
+        }
+      });
 
       grid.appendChild(li);
     });
@@ -303,7 +319,6 @@ document.getElementById("copyForm")?.addEventListener("click", async () => {
     await navigator.clipboard.writeText(result);
     alert("신청 양식이 복사되었습니다!");
   } catch (err) {
-    // 폴백: 임시 textarea로 복사
     const ta = document.createElement("textarea");
     ta.value = result;
     ta.setAttribute("readonly", "");
@@ -344,6 +359,53 @@ function buildFormText() {
   for (const key in data) result += `${key}\n- ${data[key] || "없음"}\n\n`;
   return result;
 }
+
+const imageModal = document.getElementById("imageModal");
+const imageModalImg = document.getElementById("imageModalImg");
+const imageModalCaption = document.getElementById("imageModalCaption");
+const imageModalClose = document.getElementById("imageModalClose");
+
+function openImageModal(src, caption = "") {
+  if (!imageModal || !imageModalImg) return;
+
+  imageModalImg.src = src;
+  imageModalImg.alt = caption || "확대 이미지";
+  if (imageModalCaption) {
+    imageModalCaption.textContent = caption || "";
+  }
+
+  imageModal.classList.add("is-open");
+  imageModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeImageModal() {
+  if (!imageModal || !imageModalImg) return;
+
+  imageModal.classList.remove("is-open");
+  imageModal.setAttribute("aria-hidden", "true");
+  imageModalImg.src = "";
+  imageModalImg.alt = "";
+  if (imageModalCaption) {
+    imageModalCaption.textContent = "";
+  }
+
+  document.body.style.overflow = "";
+}
+
+imageModalClose?.addEventListener("click", closeImageModal);
+
+imageModal?.addEventListener("click", (e) => {
+  if (e.target.matches("[data-close-modal]")) {
+    closeImageModal();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && imageModal?.classList.contains("is-open")) {
+    closeImageModal();
+  }
+});
 
 // ===== safe goto scroll =====
 (function () {
@@ -387,12 +449,12 @@ document.getElementById("resetForm")?.addEventListener("click", () => {
   const form = document.querySelector(".applyForm");
   if (!form) return;
 
-  // 기본 reset (input/select/textarea 초기값으로)
   form.reset();
 
-  // 혹시 값이 JS로 채워지거나 웹뷰에서 잔상 남는 경우 대비: 강제 클리어
   form.querySelectorAll("input, textarea, select").forEach((el) => {
     if (el.tagName === "SELECT") el.selectedIndex = 0;
     else el.value = "";
   });
 });
+ 
+

@@ -257,6 +257,24 @@
         </div>
     </section>
 
+    <div id="imageModal" class="imageModal" aria-hidden="true">
+        <div class="imageModal__backdrop" data-close-modal></div>
+
+        <div class="imageModal__dialog" role="dialog" aria-modal="true">
+        
+        <div class="imageModal__imgWrap">
+            <button type="button" class="imageModal__close" id="imageModalClose" aria-label="닫기">
+            ×
+            </button>
+
+            <img id="imageModalImg" class="imageModal__img" src="" alt="" />
+        </div>
+
+        <p id="imageModalCaption" class="imageModal__caption"></p>
+
+        </div>
+    </div>
+
 
     <script src="./app.js"></script>
 </body>
