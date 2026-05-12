@@ -1,3 +1,83 @@
+// ===== iframe height / parent viewport bridge =====
+const SYURA_PARENT_ORIGIN = "https://artmug.kr";
+const SYURA_ALLOWED_PARENT_ORIGINS = [
+  "https://artmug.kr",
+  "https://www.artmug.kr"
+];
+
+let syuraLastSentHeight = 0;
+let syuraParentViewport = null;
+
+function sendIframeHeightToParent() {
+  if (!window.parent || window.parent === window) return;
+
+  const height = Math.ceil(Math.max(
+    document.documentElement.scrollHeight || 0,
+    document.body?.scrollHeight || 0,
+    document.documentElement.offsetHeight || 0,
+    document.body?.offsetHeight || 0
+  ));
+
+  if (Math.abs(height - syuraLastSentHeight) < 4) return;
+  syuraLastSentHeight = height;
+
+  window.parent.postMessage(
+    { source: "syura-css", type: "SYURA_IFRAME_HEIGHT", height },
+    "*"
+  );
+}
+
+function notifyIframeReady() {
+  if (!window.parent || window.parent === window) return;
+  window.parent.postMessage(
+    { source: "syura-css", type: "SYURA_IFRAME_READY" },
+    "*"
+  );
+  sendIframeHeightToParent();
+}
+
+function applyParentViewport(data) {
+  syuraParentViewport = data || null;
+
+  const viewportHeight = Number(data?.viewportHeight || window.innerHeight || 0);
+  const iframeTop = Number(data?.iframeTop || 0);
+
+  const visibleTop = Math.max(0, -iframeTop);
+  const visibleBottom = Math.max(0, Math.min(Number(data?.iframeHeight || 0), viewportHeight - iframeTop));
+  const visibleHeight = Math.max(320, visibleBottom - visibleTop || viewportHeight);
+  const centerY = visibleTop + visibleHeight / 2;
+
+  document.documentElement.style.setProperty("--parent-modal-top", `${centerY}px`);
+  document.documentElement.style.setProperty("--parent-modal-height", `${Math.max(320, visibleHeight)}px`);
+}
+
+window.addEventListener("message", (e) => {
+  if (SYURA_ALLOWED_PARENT_ORIGINS.length && !SYURA_ALLOWED_PARENT_ORIGINS.includes(e.origin)) return;
+
+  const data = e.data || {};
+  if (data.source !== "syura-artmug-parent") return;
+
+  if (data.type === "SYURA_PARENT_VIEWPORT") {
+    applyParentViewport(data);
+  }
+});
+
+function setupIframeAutoResize() {
+  notifyIframeReady();
+
+  if ("ResizeObserver" in window) {
+    const ro = new ResizeObserver(() => requestAnimationFrame(sendIframeHeightToParent));
+    ro.observe(document.documentElement);
+    if (document.body) ro.observe(document.body);
+  }
+
+  window.addEventListener("load", sendIframeHeightToParent);
+  window.addEventListener("resize", sendIframeHeightToParent);
+  setTimeout(sendIframeHeightToParent, 300);
+  setTimeout(sendIframeHeightToParent, 1000);
+  setTimeout(sendIframeHeightToParent, 2000);
+}
+
 // app.js
 
 const NOTICE_CSV_URL =
@@ -310,6 +390,72 @@ async function renderPortfolioFromCsv(csvUrl, targetSelector){
   }
 }
 
+// === 협업 작가 ===
+const COLLAB_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-XmfO0Kmn1WxK_gbsXHFPNY_XuS6EPciWj-1NWcDbIQdcx2plZxDjUpxAR1qo8X-KtxbJuznRiqd2/pub?gid=774580265&single=true&output=csv";
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderCollabFromCsv(COLLAB_CSV_URL, "#collabGrid");
+  setupIframeAutoResize();
+});
+
+async function renderCollabFromCsv(csvUrl, targetSelector) {
+  const grid = document.querySelector(targetSelector);
+  if (!grid) return;
+
+  try {
+    const res = await fetch(csvUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const text = await res.text();
+    const rows = parseCsv(text).slice(1);
+
+    grid.innerHTML = "";
+
+    rows
+      .map(row => ({
+        order: Number(row[0] || 0),
+        name: (row[1] || "").trim(),
+        desc: (row[2] || "").trim(),
+        thumbs: [row[3], row[4], row[5]].map(v => (v || "").trim()).filter(Boolean),
+        link: (row[6] || "").trim()
+      }))
+      .filter(item => item.name)
+      .sort((a, b) => a.order - b.order)
+      .forEach(item => {
+        const li = document.createElement("li");
+        li.className = "collabCard";
+
+        const thumbs = item.thumbs.slice(0, 3);
+        const thumbHtml = thumbs.length
+          ? thumbs.map((src, idx) => `
+              <button type="button" class="collabCard__thumbBtn" aria-label="${escapeHtml(item.name)} 샘플 ${idx + 1} 크게 보기">
+                <img src="${escapeHtml(src)}" alt="${escapeHtml(item.name)} 샘플 ${idx + 1}" class="collabCard__thumb" loading="lazy">
+              </button>
+            `).join("")
+          : `<div class="collabCard__empty">이미지 준비중</div>`;
+
+        li.innerHTML = `
+          <div class="collabCard__thumbs">${thumbHtml}</div>
+          <div class="collabCard__body">
+            <h3 class="collabCard__name">${escapeHtml(item.name)}</h3>
+            <p class="collabCard__desc">${escapeHtml(item.desc || "")}</p>
+            ${item.link ? `<a class="collabCard__link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">작가님 페이지 보기</a>` : ""}
+          </div>
+        `;
+
+        li.querySelectorAll(".collabCard__thumbBtn").forEach((btn, idx) => {
+          btn.addEventListener("click", () => openImageModal(thumbs[idx], `${item.name} 샘플 ${idx + 1}`));
+        });
+
+        grid.appendChild(li);
+      });
+
+    sendIframeHeightToParent();
+  } catch (err) {
+    console.error("[collab] load failed:", err);
+  }
+}
 
 
 document.getElementById("copyForm")?.addEventListener("click", async () => {
@@ -377,6 +523,9 @@ function openImageModal(src, caption = "") {
   imageModal.classList.add("is-open");
   imageModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+
+  if (syuraParentViewport) applyParentViewport(syuraParentViewport);
+  sendIframeHeightToParent();
 }
 
 function closeImageModal() {
@@ -391,6 +540,7 @@ function closeImageModal() {
   }
 
   document.body.style.overflow = "";
+  sendIframeHeightToParent();
 }
 
 imageModalClose?.addEventListener("click", closeImageModal);
