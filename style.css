@@ -786,7 +786,7 @@ html { scroll-behavior: smooth; }
 .collab__title{
   margin: 0;
   font-family: 'OneStoreMobileGothicBody', sans-serif;
-  font-size: clamp(30px, 5vw, 46px);
+  font-size: clamp(20px, 3vw, 28px);
   line-height: 1.12;
   letter-spacing: -0.04em;
   color: var(--ink);
