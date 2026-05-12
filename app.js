@@ -445,10 +445,16 @@ async function renderCollabFromCsv(csvUrl, targetSelector) {
         const li = document.createElement("li");
         li.className = "collabCard";
 
-        const thumb = item.thumbs[0] || "";
-        const imageInner = thumb
-          ? `<img src="${escapeHtml(thumb)}" alt="${escapeHtml(item.name)} 대표 이미지" class="collabCard__image" loading="lazy">`
-          : `<span class="collabCard__placeholder">이미지 여기에 삽입 / 클릭시 하이퍼링크 이동</span>`;
+        const thumbs = item.thumbs.slice(0, 3);
+        const imageInner = thumbs.length
+          ? `<div class="collabCard__thumbGrid">
+              ${thumbs.map((thumb, index) => `
+                <figure class="collabCard__thumb">
+                  <img src="${escapeHtml(thumb)}" alt="${escapeHtml(item.name)} 샘플 이미지 ${index + 1}" class="collabCard__image" loading="lazy">
+                </figure>
+              `).join("")}
+            </div>`
+          : `<span class="collabCard__placeholder">이미지 준비중입니다.</span>`;
 
         const imageBox = item.link
           ? `<a class="collabCard__imageLink" href="${escapeHtml(item.link)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.name)} 페이지로 이동">${imageInner}</a>`
@@ -456,8 +462,9 @@ async function renderCollabFromCsv(csvUrl, targetSelector) {
 
         li.innerHTML = `
           <article class="collabCard__box">
+            <h3 class="collabCard__name">${escapeHtml(item.name)}</h3>
             ${imageBox}
-            <p class="collabCard__desc">${escapeHtml(item.desc || "")}</p>
+            ${item.desc ? `<p class="collabCard__desc">${escapeHtml(item.desc)}</p>` : ""}
           </article>
         `;
 
@@ -525,6 +532,19 @@ const imageModalCaption = document.getElementById("imageModalCaption");
 const imageModalClose = document.getElementById("imageModalClose");
 
 function openImageModal(src, caption = "") {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(
+      {
+        source: "syura-css",
+        type: "SYURA_OPEN_IMAGE_MODAL",
+        src,
+        caption
+      },
+      "*"
+    );
+    return;
+  }
+
   if (!imageModal || !imageModalImg) return;
 
   imageModalImg.src = src;
