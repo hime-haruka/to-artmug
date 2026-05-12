@@ -216,6 +216,8 @@ async function renderAddonsFromCsv(csvUrl, targetSelector){
       `;
       grid.appendChild(li);
     });
+
+    sendIframeHeightToParent();
   }catch(err){
     console.error("[addons] load failed:", err);
   }
@@ -290,11 +292,24 @@ async function renderSalesFromCsv(csvUrl, targetSelector){
     const rows = parseCsv(text).slice(1);
     grid.innerHTML = "";
 
-    rows.forEach(row => {
-      const [order, title, imgUrl, linkUrl, isActive] = row;
+    const items = rows
+      .map(row => {
+        const [order, title, imgUrl, linkUrl, isActive] = row;
+        return { order, title, imgUrl, linkUrl, isActive };
+      })
+      .filter(item => item.isActive !== "FALSE" && item.imgUrl);
 
-      if (isActive === "FALSE" || !imgUrl) return;
+    const section = grid.closest("section");
+    if (!items.length) {
+      if (section) section.hidden = true;
+      sendIframeHeightToParent();
+      return;
+    }
 
+    if (section) section.hidden = false;
+
+    items.forEach(item => {
+      const { title, imgUrl, linkUrl } = item;
       const src = convertDriveUrl(imgUrl);
       const altText = title || "판매작 이미지";
 
@@ -325,6 +340,8 @@ async function renderSalesFromCsv(csvUrl, targetSelector){
 
       grid.appendChild(li);
     });
+
+    sendIframeHeightToParent();
   }catch(err){
     console.error("[sales] load failed:", err);
   }
@@ -385,6 +402,8 @@ async function renderPortfolioFromCsv(csvUrl, targetSelector){
 
       grid.appendChild(li);
     });
+
+    sendIframeHeightToParent();
   }catch(err){
     console.error("[portfolio] load failed:", err);
   }
@@ -426,27 +445,21 @@ async function renderCollabFromCsv(csvUrl, targetSelector) {
         const li = document.createElement("li");
         li.className = "collabCard";
 
-        const thumbs = item.thumbs.slice(0, 3);
-        const thumbHtml = thumbs.length
-          ? thumbs.map((src, idx) => `
-              <button type="button" class="collabCard__thumbBtn" aria-label="${escapeHtml(item.name)} 샘플 ${idx + 1} 크게 보기">
-                <img src="${escapeHtml(src)}" alt="${escapeHtml(item.name)} 샘플 ${idx + 1}" class="collabCard__thumb" loading="lazy">
-              </button>
-            `).join("")
-          : `<div class="collabCard__empty">이미지 준비중</div>`;
+        const thumb = item.thumbs[0] || "";
+        const imageInner = thumb
+          ? `<img src="${escapeHtml(thumb)}" alt="${escapeHtml(item.name)} 대표 이미지" class="collabCard__image" loading="lazy">`
+          : `<span class="collabCard__placeholder">이미지 여기에 삽입 / 클릭시 하이퍼링크 이동</span>`;
+
+        const imageBox = item.link
+          ? `<a class="collabCard__imageLink" href="${escapeHtml(item.link)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.name)} 페이지로 이동">${imageInner}</a>`
+          : `<div class="collabCard__imageLink" role="img" aria-label="${escapeHtml(item.name)} 대표 이미지">${imageInner}</div>`;
 
         li.innerHTML = `
-          <div class="collabCard__thumbs">${thumbHtml}</div>
-          <div class="collabCard__body">
-            <h3 class="collabCard__name">${escapeHtml(item.name)}</h3>
+          <article class="collabCard__box">
+            ${imageBox}
             <p class="collabCard__desc">${escapeHtml(item.desc || "")}</p>
-            ${item.link ? `<a class="collabCard__link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">작가님 페이지 보기</a>` : ""}
-          </div>
+          </article>
         `;
-
-        li.querySelectorAll(".collabCard__thumbBtn").forEach((btn, idx) => {
-          btn.addEventListener("click", () => openImageModal(thumbs[idx], `${item.name} 샘플 ${idx + 1}`));
-        });
 
         grid.appendChild(li);
       });
