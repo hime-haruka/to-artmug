@@ -462,7 +462,7 @@ async function renderCollabFromCsv(csvUrl, targetSelector) {
 
         li.innerHTML = `
           <article class="collabCard__box">
-            <h3 class="collabCard__name">${escapeHtml(item.name)}</h3>
+            <h3 class="collabCard__name">${escapeHtml(item.name)} 작가님</h3>
             ${imageBox}
             ${item.desc ? `<p class="collabCard__desc">${escapeHtml(item.desc)}</p>` : ""}
           </article>
