@@ -266,11 +266,6 @@ async function renderAvatarImagesFromCsv(csvUrl, targetSelector){
   }
 }
 
-function convertDriveUrl(url){
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (!match) return url;
-  return `https://lh3.googleusercontent.com/d/${match[1]}`;
-}
 
 
 // === 판매작 ===
@@ -436,7 +431,10 @@ async function renderCollabFromCsv(csvUrl, targetSelector) {
         order: Number(row[0] || 0),
         name: (row[1] || "").trim(),
         desc: (row[2] || "").trim(),
-        thumbs: [row[3], row[4], row[5]].map(v => (v || "").trim()).filter(Boolean),
+        thumbs: [row[3], row[4], row[5]]
+          .map(v => (v || "").trim())
+          .filter(Boolean)
+          .map(convertDriveUrl),
         link: (row[6] || "").trim()
       }))
       .filter(item => item.name)
