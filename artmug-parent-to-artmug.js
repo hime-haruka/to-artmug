@@ -1,5 +1,5 @@
 (function () {
-  const IFRAME_ORIGIN = 'https://to-artmug.netlify.app';
+  const IFRAME_ORIGIN = 'https://hime-haruka.github.io';
 
   let lastHeight = 0;
   let viewportTimer = null;
